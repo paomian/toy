@@ -41,8 +41,9 @@ impl<'a, T> Iterator for IterMut<'a, T> {
         //     self.0 = node.next.as_deref_mut();
         //     &mut node.elem
         // })
-        //self.0.as_deref_mut()
-        // 一个可变借用，
+        // 上面的代码 self 是一个可变借用，就表示 self 不能 move 所以，用 take 给 self.0
+        // 塞上一个 None 然后，创建一个新的零时拥有所有权的 Option 在这个 Option 上做操作
+        // 就可以 move 了
         self.0.take().map(|node| {
             self.0 = node.next.as_deref_mut();
             &mut node.elem
