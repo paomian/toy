@@ -1,5 +1,4 @@
-use std::mem;
-
+#[derive(Default)]
 pub struct List<T> {
     head: Link<T>,
 }
@@ -58,7 +57,7 @@ impl<T> List<T> {
 
     pub fn push(&mut self, elem: T) {
         self.head = Some(Box::new(Node {
-            elem: elem,
+            elem,
             next: self.head.take(),
         }));
     }
@@ -78,10 +77,6 @@ impl<T> List<T> {
         self.head.as_mut().map(|node| &mut node.elem)
     }
 
-    pub fn into_iter(self) -> IntoIter<T> {
-        IntoIter(self)
-    }
-
     pub fn iter<'a>(&'a self) -> Iter<'a, T> {
         Iter::<'a, T>(self.head.as_deref())
     }
@@ -91,9 +86,17 @@ impl<T> List<T> {
     }
 }
 
+impl<T> IntoIterator for List<T> {
+    type Item = T;
+    type IntoIter = IntoIter<T>;
+    fn into_iter(self) -> Self::IntoIter {
+        IntoIter(self)
+    }
+}
+
 impl<T> Drop for List<T> {
     fn drop(&mut self) {
-        let mut current_link = mem::replace(&mut self.head, Link::None);
+        let mut current_link = self.head.take();
         while let Some(boxed_node) = current_link {
             current_link = boxed_node.next;
         }
